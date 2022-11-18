@@ -1,0 +1,86 @@
+BUG
+ - Shocksteed [Electric/Bug]
+
+DARK
+ - Terroforma [Dark/Ground]
+ - Synacorvo [Dark/Psychic]
+
+DRAGON
+ - Savitaur (Juan's Pre-evolution) [Psychic/Dragon]
+ - Marijuadon [Psychic/Dragon]
+
+ELECTRIC
+ - Cracklesap's Pre-evolution [Electric/Grass]
+ - Cracklesap [Electric/Grass]
+ - Cracklesap's Evolution [Electric/Grass]
+ - Shocksteed [Electric/Bug]
+ - Venion Pre [Electric]
+ - Venion [Electric/Poison]
+ - Venion Evo [Electric/Poison]
+
+FAIRY
+ - Chrysogor [Ground/Fairy]
+ - Tephron [Flying/Fairy]
+
+FIGHTING
+ - Ryno [Normal/Fighting]
+
+FIRE
+ - Smoglet (Flamura's Pre-evolution) [Ghost/Fire]
+ - Flamura [Ghost/Fire]
+ - Ignantom (Flamura's Evolution) [Ghost/Fire]
+
+FLYING
+ - Aqulia's Pre-evolution [Flying/Water]
+ - Aquilia [Flying/Water]
+ - Aquilia's Evolution [Flying/Water]
+
+GHOST
+ - Cryoul [Ice/Ghost]
+ - Smoglet [Ghost/Fire]
+ - Flamura [Ghost/Fire]
+ - Ignantom [Ghost/Fire]
+ - Spookspew [Ghost/Poison]
+
+GRASS
+ - Cracklesap's Pre [Electric/Grass]
+ - Cracklesap [Electric/Grass]
+ - Cracklesap's Evo [Electric/Grass]
+
+GROUND
+ - Terroforma [Dark/Ground]
+ - Chrysogor [Ground/Fairy]
+
+ICE
+ - Cryoul [Ice/Ghost]
+
+NORMAL
+ - Ryno [Normal/Fighting]
+
+POISON
+ - Spookspew [Ghost/Poison]
+ - Venion Pre [Electric]
+ - Venion [Electric/Poison]
+ - Venion Evo [Electric/Poison]
+
+PSYCHIC
+ - Savitaur [Psychic/Dragon]
+ - Marijuadon [Psychic/Dragon]
+ - Spelux [Steel/Psychic]
+ - Spelux Evo [Steel/Psychic]
+ - Synacorvo [Dark/Psychic]
+ - Organ Seahorse [Water/Psychic]
+
+ROCK
+ - 
+
+STEEL
+ - Spelux Pre [Steel]
+ - Spelux [Steel/Psychic]
+ - Spelux Evo [Steel/Psychic]
+
+WATER
+ - Aquilia Pre [Water/Flying]
+ - Aquilia [Water/Flying]
+ - Aquilia Evo [Water/Flying]
+
