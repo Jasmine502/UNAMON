@@ -1,0 +1,5 @@
+""
+
+Can you re-write the above so it is structured and described like the Biology tab in Bulbapedia? For example: Smoglet is a bipedal, chiropteran Fakemon with a primarily brown body and orange eyes. It has long, pointed ears from either side of its head that emit heat, which illuminates this Fakemon's path and its body, giving it a short orange-hue. The ears are only warm to the touch and seem to move depending on Smoglet's emotions (down when sad, up when angry, back when scared).
+
+Given it's small size and weight, Smoglet protects itself with its wings, which despite being fragile too, regenerate whenever damaged, though never fully. Smoglet cannot use its wings to fly due to this. They also have two small fangs at the top of its mouth and a red patch of fur right below their neck. 

@@ -1,0 +1,59 @@
+ARIES
+Name - Blazarus 
+Type - Fire/Poison
+Pokedex Entry - Blazarus is an impulsive Fire and Poison-type Fakemon whose burning nature is just as visible in its physical form as it is in its attitude. An intense red scales covers its body, its two horns and tail wreathed in flame. It is always the first to strike when it feels threatened, the heat from its attack just as blistering as its flaming fur.
+
+TAURUS
+Name - Oxiol 
+Type - Ground/Fairy
+Pokedex Entry - Oxiol is an incredibly gentle Fakemon whose most notable features are its two horns. It is a Ground and Fairy-type Pokemon, covered in a combination of smooth brown fur and light yellow fur, which shifts in the wind. Oxiol is known to give a peaceful energy to its friends and allies, and its patience and determination makes it a formidable opponent in battle.
+
+GEMINI
+Name - Dualodon 
+Type - Electric/Psychic
+Pokedex Entry - Dualodon is an Electric and Psychic-type Fakemon that appears as two identical twins whose silver fur reflects the light. Its two heads are connected by a streak of electricity that crackles around its body. It is incredibly fast and proficient at double team tactics, never giving its opponents an opportunity to get away.
+
+CANCER
+Name -  Shellshock 
+Type - Water/Fighting
+Pokedex Entry - Shellshock is a gentle Water and Fighting-type Fakemon whose shell is covered in a protective armor that won't easily break. It is always on the look out for its friends, always ready for a fight if it senses a friend is threatened. Despite its hard exterior, Shellshock isn't afraid to show emotion, releasing waves of water from its shell when excited or upset.
+
+LEO
+Name -  Lionaxe 
+Type - Fire/Steel
+Pokedex Entry - Lionaxe is a Fire and Steel-type Fakemon that stands out from the rest with its bright gold body and impressive mane. It has an air of confidence that radiates when it faces its opponents. Its strength and tenacity make it an optimally powerful fighter, and it is always ready to take on bigger challenges.
+
+VIRGO
+Name -   Virgrackle 
+Type - Bug/Flying
+Pokedex Entry - Virgrackle is an industrious Bug and Flying-type Fakemon whose wings buzz with energy when it takes flight. Its body is covered with light brown feathers, and its wings are covered with a pattern of light green. It has a focused and determined mindset, and its keen eye for detail is what makes it such an valuable ally. 
+
+LIBRA
+Name -  Balancer 
+Type - Psychic/Grass
+Pokedex Entry - Balancer is a Psychic and Grass-type Fakemon with a peaceful demeanor. Its body is covered in light green and pink fur, and its two wings spread out wide when it takes to the air. It is incredibly skilled in balancing the energies of its allies, aiding in restoring good will and harmony in between them.
+
+SCORPIO
+Name - Scorpiger 
+Type - Dark/Poison
+Pokedex Entry - Scorpiger is a Dark and Poison-type Fakemon that has a menacing aura. Its body is covered in light purple fur, and its tail is the same color and ends in a sharp point. It hides in the shadows, ready to strike without warning with its venomous attack.
+
+SAGITTARIUS
+Name -  Bowhorn 
+Type - Normal/Flying
+Pokedex Entry - Bowhorn is a Normal and Flying-type Fakemon who loves to explore the world and its cultures. Its white and grey fur gives it a unique look, and its two horns taper off into two energetic blades that radiate the need for protection and adventure. Bowhorn is always looking for a new challenge and is never afraid to take a risk.
+
+CAPRICORN
+Name -  Caprack 
+Type - Rock/Steel
+Pokedex Entry - Caprack is a Rock and Steel-type Fakemon that stands out due to its impressive physical form. Its golden body is covered in gray rocks, and its horns taper off into two powerful drills. Its sheer strength and determination make it an unyielding force in battle and a valuable ally on any team.
+
+AQUARIUS
+Name - Aquashot 
+Type - Water/Steel
+Pokedex Entry - Aquashot is a Water and Steel-type Fakemon with a unique form. Its body is covered in iridescent blue scales, and its two horns are tipped with spikes. It is a powerful fighter in the water, able to twist and turn like a flowing river in order to outmaneuver its opponents.
+
+PISCES
+Name -  Pisceon 
+Type - Water/Psychic
+Pokedex Entry - Pisceon is a Water and Psychic-type Fakemon whose graceful movements in the water make it almost impossible to keep track of. Its light blue scales and long, flowing fins give it an ethereal appearance, and its aura exudes calming energy when it is nearby. Pisceon is constantly swimming, looking for beauty and peace in its travels.
