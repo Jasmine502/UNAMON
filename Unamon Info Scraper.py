@@ -22,7 +22,10 @@ class UnamonInfoGUI(QWidget):
 
     # Connect the button to the get_info function
     self.info_button.clicked.connect(self.get_info)
+    # Connect the press of the Enter key to the get_info function
     self.name_edit.returnPressed.connect(self.get_info)
+
+    self.setWindowTitle("Unamon Info")
 
   def get_unamon_info(self, name):
     # Replace spaces in the Unamon's name with underscores, as that's how the name is formatted in the URL
@@ -64,6 +67,9 @@ class UnamonInfoGUI(QWidget):
       # Set the text of the info edit to a message indicating that the Unamon does not exist
       self.info_edit.setPlainText("Unamon does not exist.")
     else:
+      # Set the window title to the Unamon name
+      self.setWindowTitle(name.title())
+
       # Set the infobox text as the text of the info edit
       self.info_edit.setPlainText(infobox_text)
 
