@@ -1,5 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QTextEdit
+from PyQt5.QtGui import QIcon
 import requests
 from bs4 import BeautifulSoup
 
@@ -25,7 +26,11 @@ class UnamonInfoGUI(QWidget):
     # Connect the press of the Enter key to the get_info function
     self.name_edit.returnPressed.connect(self.get_info)
 
-    self.setWindowTitle("Unamon Info")
+    # Set the initial window title to "Unamon Info Scraper"
+    self.setWindowTitle("Unamon Lookup")
+
+    # Set the window icon
+    self.setWindowIcon(QIcon("ULookup.ico"))
 
   def get_unamon_info(self, name):
     # Replace spaces in the Unamon's name with underscores, as that's how the name is formatted in the URL
