@@ -1,6 +1,6 @@
 import pyperclip
 
-unamon_list = ["Smoglet","Flamura","Ignantom","Flopix","Aquilia","Marinawk","Cracklesap","Salamendro","Wyvorophyll","Cryoul","Cryophant","Savitaur","Marijuadon","Shocksteed","Ryno","Spookspew","Ectoxomoth","Myrkkane","Corvapse","Neurocowl","Hypothalaven","Venion","Ampixie","Faerumen","Spelux","Ferrizari","Neuraphin","Nauticorp","Orgamarina","Orgamarino","Chrysogor","Tephron","Terroforma","Afterwrithe","Pharoant","Sekhant","Dhascarab","Roddig","Burrowatt","Excavolt","Grifling","Gryfleia","Gryfnosa","Moxra","Mosantis","Exvil","Stad","Stuana","Stainana","Wyfern","Folyvern","Grumbo","Landignor","Titanger","Magmoroch","Vesophry"]
+unamon_list = ["Smoglet","Flamura","Ignantom","Flopix","Aquilia","Marinawk","Cracklesap","Salamendro","Wyvorophyll","Cryoul","Cryophant","Savitaur","Marijuadon","Shocksteed","Ryno","Spookspew","Ectoxomoth","Myrkkane","Corvapse","Neurocowl","Hypothalaven","Venion","Ampixie","Faerumen","Spelux","Ferrizari","Neuraphin","Nauticorp","Orgamarina","Orgamarino","Chrysogor","Tephron","Terroforma","Afterwrithe","Pharoant","Sekhant","Dhascarab","Roddig","Burrowatt","Excavolt","Grifling","Gryfleia","Gryfnosa","Moxra","Mosantis","Mutamania","Stad","Stuana","Stainana","Wyfern","Folyvern","Grumbo","Landignor","Titanger","Magmoroch","Vesophry"]
 
 def get_udex_number(unamon):
     return str(unamon_list.index(unamon) + 1).zfill(2)
