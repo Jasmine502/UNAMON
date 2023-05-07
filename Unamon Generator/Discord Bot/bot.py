@@ -93,7 +93,7 @@ async def gen(ctx, *words):
     # Map user IDs to Poe API tokens
     users = {
         "294589366599417856": "BcZb2oEDNIXTLIzazQjuHA%3D%3D",  # JAY
-        "386145081092079623": "sRNsvgWw5SOdyuDB2wSaMg%3D%3D",  # AM
+        "386145081092079623": "sRNsvgWw5SOdyuDB2wSaMg%3D%3D",  # Mar
     }
     user_id = str(ctx.author.id)
     pToken = users.get(user_id)
