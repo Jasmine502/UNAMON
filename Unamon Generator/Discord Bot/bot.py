@@ -91,11 +91,10 @@ async def on_ready():
 @client.command()
 async def gen(ctx, *words):
     # Map user IDs to Poe API tokens
-    users = {
-        "294589366599417856": "BcZb2oEDNIXTLIzazQjuHA%3D%3D",  # JAY
-        "386145081092079623": "sRNsvgWw5SOdyuDB2wSaMg%3D%3D",  # Mar
-    }
-    user_id = str(ctx.author.id)
+    users = {}
+    for user_id in os.environ:
+        user_id = str(ctx.author.id)
+        users[user_id] = os.getenv(user_id)
     pToken = users.get(user_id)
 
     # If user is not recognised
