@@ -78,8 +78,6 @@ class UnamonInfoGUI(QWidget):
       # Set the infobox text as the text of the info edit
       self.info_edit.setPlainText(infobox_text)
 
-
-
 # Run the GUI
 app = QApplication(sys.argv)
 gui = UnamonInfoGUI()
