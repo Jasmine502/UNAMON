@@ -83,9 +83,15 @@ def update_training_unamon(user_id, unamon_name, level, current_xp):
     with open("unamon_training.txt", "w") as f:
         f.write("\n".join(new_lines))
 
+
 @client.event
 async def on_ready():
     print('Bot is readyyyyyy')
+
+    # Display with an embed a greeting from the bot
+    embed = discord.Embed(title="Hello!", description="I'm ready to discover some new Unamon!", color=discord.Color.blue())
+    embed.set_author(name="Unamon Generator", icon_url="https://i.imgur.com/6EkzZWy.png")
+    await client.get_channel(1095804559198273648).send(embed=embed)
 
 
 @client.command()
@@ -105,6 +111,7 @@ async def gen(ctx, *words):
     # Submit token and clear context
     pClient = poe.Client(pToken)
     pClient.send_chat_break("chinchilla")
+
     # If no words provided, generate random words
     if not words:
         while True:
@@ -319,6 +326,22 @@ async def train(ctx, *, name: str):
     with open("unamon_training.txt", "a") as f:
         f.write(f"{ctx.author.id},{unamon['name']},1,0\n")
 
+    # Handle the case where paramaters are not provided
+@train.error
+async def train_error(ctx, error):
+    # Check if the error is a missing parameter error
+    if isinstance(error, commands.MissingRequiredArgument):
+        embed = discord.Embed(description="Please provide a name for the Unamon you want to train.", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
+        return
+    # Handle any other errors
+    else:
+        embed = discord.Embed(description=f"Error: {str(error)}", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
+        return
+
 
 @client.event
 async def on_message(message):
@@ -343,5 +366,15 @@ async def on_message(message):
         await message.channel.send(embed=embed)
     update_training_unamon(user_id, unamon_name, level, current_xp)
 
+    # Check if the Unamon has reached level 100 and stop training it if so
+    if level == 100:
+        embed = discord.Embed(description=f"{message.author.mention}'s {unamon_name} has reached level 100!", color=discord.Color.green())
+        await message.channel.send(embed=embed)
+        with open("unamon_training.txt", "r") as f:
+            lines = f.readlines()
+        with open("unamon_training.txt", "w") as f:
+            for line in lines:
+                if line.strip() != f"{user_id},{unamon_name},100,0":
+                    f.write(line)
 
 client.run(TOKEN)
