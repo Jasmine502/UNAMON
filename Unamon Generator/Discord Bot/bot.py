@@ -103,13 +103,17 @@ async def gen(ctx, *words):
         users[user_id] = os.getenv(user_id)
     pToken = users.get(user_id)
 
-    # If user is not recognised
+    # If user or token not found, return
     if not pToken:
-        await ctx.send("I don't know you.")
+        embed = discord.Embed(description=f"Sorry, you are not recognised as a user, or your token is invalid.", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
         return
 
     # Submit token and clear context
     pClient = poe.Client(pToken)
+
+    # Clear context to Poe API
     pClient.send_chat_break("chinchilla")
 
     # If no words provided, generate random words
@@ -161,7 +165,9 @@ async def gen(ctx, *words):
     try:
         unamon_name, unamon_desc = get_unamon_info(pClient, words)
     except Exception as e:
-        await ctx.send(f"Error: {str(e)}")
+        embed = discord.Embed(description=f"Error: {str(e)}", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
         return
     color = discord.Color.random()
     embed = discord.Embed(title=f"{unamon_name.upper()}", description=unamon_desc, color=color)
