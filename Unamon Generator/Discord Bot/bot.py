@@ -153,7 +153,7 @@ async def gen(ctx, *words):
 
     # If custom words provided, validate the input
     elif len(words) != 2:
-        embed = discord.Embed(description=f"Please provide either 2 words, or no words to generate a Unamon.", color=discord.Color.red())
+        embed = discord.Embed(description=f"Please provide either 2 words, or no words to generate an Unamon.", color=discord.Color.red())
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
         return
@@ -232,6 +232,7 @@ async def gen(ctx, *words):
 
             # Send a congratulatory message
             embed = discord.Embed(title=f"Congratulations, {ctx.author.name}!", description=f"You caught **{unamon_name}**!", color=discord.Color.green())
+            embed.set_footer(text=f"Type .u to view all your caught Unamon.")
             embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
             await ctx.send(embed=embed)
     elif reaction.emoji == "👎":
@@ -263,6 +264,7 @@ async def u(ctx, *, arg=None):
         
         unamon_names = [unamon["name"] for unamon in unamon_list]
         embed = discord.Embed(title=f"{ctx.author.name}'s Caught Unamon", description="\n".join(unamon_names), color=discord.Color.blue())
+        embed.set_footer(text="Type .u <name> to view the details of a specific Unamon.")
     else:
         unamon = next((f for f in unamon_list if f["name"].lower() == arg.lower()), None)
         
@@ -317,6 +319,8 @@ async def train(ctx, *, name: str):
         await ctx.send(embed=embed)
         return
 
+
+    # Check if the user is already training an Unamon
     training_unamon = get_training_unamon_by_user(ctx.author.id)
     if training_unamon is not None:
         embed = discord.Embed(description=f"You are already training {training_unamon[1]}!", color=discord.Color.orange())
@@ -332,7 +336,8 @@ async def train(ctx, *, name: str):
     with open("unamon_training.txt", "a") as f:
         f.write(f"{ctx.author.id},{unamon['name']},1,0\n")
 
-    # Handle the case where paramaters are not provided
+
+# Handle invalid train parameters
 @train.error
 async def train_error(ctx, error):
     # Check if the error is a missing parameter error
@@ -341,14 +346,77 @@ async def train_error(ctx, error):
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
         return
-    # Handle any other errors
-    else:
-        embed = discord.Embed(description=f"Error: {str(error)}", color=discord.Color.red())
+    
+
+# Handle the case where paramaters are not provided
+@train.error
+async def train_error(ctx, error):
+    # Check if the error is a missing parameter error
+    if isinstance(error, commands.MissingRequiredArgument):
+        embed = discord.Embed(description="Please provide a name for the Unamon you want to train.", color=discord.Color.red())
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
         return
 
+# A command that allows users to check the progress of their training Unamon
+@client.command()
+async def xp(ctx):
+    # Check if the user is training an Unamon
+    training_unamon = get_training_unamon_by_user(ctx.author.id)
+    if training_unamon is None:
+        embed = discord.Embed(description=f"You are not training any Unamon.", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
+        return
 
+    # Display the progress of the Unamon in an organised embed
+    user_id, unamon_name, level, current_xp = training_unamon
+    required_xp = 10 * level ** 2
+    embed = discord.Embed(title=f"{unamon_name.upper()}", description=f"Level: {level}\nXP: {current_xp}/{required_xp}", color=discord.Color.blue())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
+
+
+# A command that allows users to release their Unamon of choice
+@client.command()
+async def release(ctx, *, name: str):
+    # Check if the user has the Unamon they want to release
+    unamon = get_unamon_by_name(ctx.author.id, name.title())
+    if unamon is None:
+        embed = discord.Embed(description=f"You don't have an Unamon with that name.", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
+        return
+
+    # Load the caught Unamon file
+    caught_file = os.path.join(os.path.dirname(__file__), "caught_unamon.txt")
+    if not os.path.exists(caught_file):
+        with open(caught_file, "w") as f:
+            f.write(json.dumps({}))
+    with open(caught_file, "r") as f:
+        caught_data = json.loads(f.read())
+
+    # Remove the Unamon from the file
+    caught_data[str(ctx.author.id)] = [unamon for unamon in caught_data[str(ctx.author.id)] if unamon["name"] != name.title()]
+    with open(caught_file, "w") as f:
+        f.write(json.dumps(caught_data))
+
+    # Remove the Unamon from the training file if it is being trained
+    training_unamon = get_training_unamon_by_user(ctx.author.id)
+    if training_unamon is not None and training_unamon[1] == name.title():
+        with open("unamon_training.txt", "r") as f:
+            lines = f.readlines()
+        with open("unamon_training.txt", "w") as f:
+            for line in lines:
+                if line.strip() != f"{ctx.author.id},{name.title()},{training_unamon[2]},{training_unamon[3]}":
+                    f.write(line)
+
+    # Send a message confirming the release
+    embed = discord.Embed(description=f"You have released {name.title()}.", color=discord.Color.green())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
+
+# Event that handles the case where a user sends a message, and gives XP to their training Unamon
 @client.event
 async def on_message(message):
     await client.process_commands(message)
@@ -382,5 +450,18 @@ async def on_message(message):
             for line in lines:
                 if line.strip() != f"{user_id},{unamon_name},100,0":
                     f.write(line)
+
+
+# Help command that displays all commands
+client.remove_command("help")
+@client.command()
+async def help(ctx):
+    embed = discord.Embed(title="Help", description="Here are all the commands you can use:", color=discord.Color.blue())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    embed.add_field(name="Discovering", value="`.gen <word1> <word2>` - Generates an Unamon with the given words.\n`.gen` - Generates an Unamon with random words.", inline=False)
+    embed.add_field(name="Studying", value="`.u` - Displays all your caught Unamon.\n`.u <name>` - Displays the details of the Unamon with the given name.", inline=False)
+    embed.add_field(name="Training", value="`.train <name>` - Starts training the Unamon with the given name.\n`.xp` - Displays the progress of your training Unamon.", inline=False)
+    embed.add_field(name="Releasing", value="`.release <name>` - Releases the Unamon with the given name.", inline=False)
+    await ctx.send(embed=embed)
 
 client.run(TOKEN)
