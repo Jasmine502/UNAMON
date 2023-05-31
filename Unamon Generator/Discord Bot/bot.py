@@ -36,6 +36,7 @@ def generate_stats(client, unamon_name):
              "Signature Move (with a short description), it's PP, Attack DMG, Accuracy %, the move's type, the effectiveness percentage, and the level it's learned\n" \
              "The Category of the Unamon\n" \
              "It's height and weight in imperial units\n" \
+             "It's cry in onomatopoeia\n" \
              "It's stats (HP, ATK, DEF, SpA, SpD and Speed).\n" \
              "Evolves from/into (if any)\n" \
              "An interesting, unique and creative PokéDex entry.\n" \
@@ -226,6 +227,7 @@ async def gen(ctx, *words):
                 "name": unamon_name,
                 "description": unamon_desc,
                 "stats": unamon_stats,
+                "picture": None
             })
             with open(caught_file, "w") as f:
                 f.write(json.dumps(caught_data))
@@ -279,6 +281,10 @@ async def u(ctx, *, arg=None):
         embed1.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
         embed2 = discord.Embed(title=f"{unamon['name']}'s Stats", description=unamon["stats"], color=color)
         embed2.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        # add thumbnail if it exists
+        if unamon["picture"] is not None:
+            embed1.set_thumbnail(url=unamon["picture"])
+            embed2.set_thumbnail(url=unamon["picture"])
         message = await ctx.send(embed=embed1)
         await message.add_reaction("⬅️")
         await message.add_reaction("➡️")
@@ -412,11 +418,72 @@ async def release(ctx, *, name: str):
                     f.write(line)
 
     # Send a message confirming the release
-    embed = discord.Embed(description=f"You have released {name.title()}.", color=discord.Color.green())
+    embed = discord.Embed(description=f"You let {name.title()} be free!", color=discord.Color.green())
     embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
     await ctx.send(embed=embed)
 
-# Event that handles the case where a user sends a message, and gives XP to their training Unamon
+# If user tries to release an Unamon without providing a name
+@release.error
+async def release_error(ctx, error):
+    # Check if the error is a missing parameter error
+    if isinstance(error, commands.MissingRequiredArgument):
+        embed = discord.Embed(description="Please provide a name for the Unamon you want to release.", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
+        return
+
+# Rename the Unamon with the given name
+@client.command()
+async def rename(ctx, *, name: str):
+    # Check if the user has the Unamon they want to rename
+    unamon = get_unamon_by_name(ctx.author.id, name.title())
+    if unamon is None:
+        embed = discord.Embed(description=f"You don't have an Unamon with that name.", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
+        return
+
+    # Ask the user for the new name
+    embed = discord.Embed(description=f"What would you like to rename {name.title()} to?", color=discord.Color.blue())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
+
+    def check(message):
+        return message.author == ctx.author and message.channel == ctx.channel
+
+    try:
+        message = await client.wait_for("message", timeout=60, check=check)
+    except asyncio.TimeoutError:
+        embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
+        await ctx.send(embed=embed)
+        return
+
+    # Update the Unamon's name in the caught_unamon.txt file
+    with open("caught_unamon.txt", "r") as f:
+        caught_unamon = json.load(f)
+    for unamon in caught_unamon[str(ctx.author.id)]:
+        if unamon["name"] == name.title():
+            unamon["name"] = message.content.title()
+            break
+    with open("caught_unamon.txt", "w") as f:
+        f.write(json.dumps(caught_unamon))
+
+    # Send a message confirming the rename
+    embed = discord.Embed(description=f"You have renamed {name.title()} to {message.content.title()}.", color=discord.Color.green())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
+
+# If user tries to rename an Unamon without providing a name
+@rename.error
+async def rename_error(ctx, error):
+    # Check if the error is a missing parameter error
+    if isinstance(error, commands.MissingRequiredArgument):
+        embed = discord.Embed(description="Please provide a name for the Unamon you want to rename.", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
+        return
+
+# Level up the training Unamon if the user sends a message
 @client.event
 async def on_message(message):
     await client.process_commands(message)
@@ -451,6 +518,57 @@ async def on_message(message):
                 if line.strip() != f"{user_id},{unamon_name},100,0":
                     f.write(line)
 
+# Allows user to add a picture for their Unamon and will show as a thumbnail in the embed
+@client.command()
+async def addpic(ctx, *, name: str):
+    # Check if the user has the Unamon they want to add a picture to
+    unamon = get_unamon_by_name(ctx.author.id, name.title())
+    if unamon is None:
+        embed = discord.Embed(description=f"You don't have an Unamon with that name.", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
+        return
+
+    # Ask the user for the picture
+    embed = discord.Embed(description=f"Please provide a picture for {name.title()}.", color=discord.Color.blue())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
+
+    def check(message):
+        return message.author == ctx.author and message.channel == ctx.channel
+
+    try:
+        message = await client.wait_for("message", timeout=60, check=check)
+    except asyncio.TimeoutError:
+        embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
+        await ctx.send(embed=embed)
+        return
+
+    # Update the Unamon's picture in the caught_unamon.txt file
+    with open("caught_unamon.txt", "r") as f:
+        caught_unamon = json.load(f)
+    for unamon in caught_unamon[str(ctx.author.id)]:
+        if unamon["name"] == name.title():
+            unamon["picture"] = message.content
+            break
+    with open("caught_unamon.txt", "w") as f:
+        f.write(json.dumps(caught_unamon))
+    
+    # Send a message confirming the picture
+    embed = discord.Embed(description=f"You have added a picture for {name.title()}.", color=discord.Color.green())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
+
+# If user tries to add a picture to an Unamon without providing a name
+@addpic.error
+async def addpic_error(ctx, error):
+    # Check if the error is a missing parameter error
+    if isinstance(error, commands.MissingRequiredArgument):
+        embed = discord.Embed(description="Please provide a name for the Unamon you want to add a picture to.", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
+        return
+
 
 # Help command that displays all commands
 client.remove_command("help")
@@ -459,9 +577,120 @@ async def help(ctx):
     embed = discord.Embed(title="Help", description="Here are all the commands you can use:", color=discord.Color.blue())
     embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
     embed.add_field(name="Discovering", value="`.gen <word1> <word2>` - Generates an Unamon with the given words.\n`.gen` - Generates an Unamon with random words.", inline=False)
-    embed.add_field(name="Studying", value="`.u` - Displays all your caught Unamon.\n`.u <name>` - Displays the details of the Unamon with the given name.", inline=False)
+    embed.add_field(name="Examining", value="`.u` - Displays all your caught Unamon.\n`.u <name>` - Displays the details of the Unamon with the given name.\n", inline=False)
+    embed.add_field(name="Studying", value="`.rename <name>` - Renames the Unamon with the given name.\n`.addpic <name>` - Adds a picture for the Unamon with the given name.", inline=False)
     embed.add_field(name="Training", value="`.train <name>` - Starts training the Unamon with the given name.\n`.xp` - Displays the progress of your training Unamon.", inline=False)
     embed.add_field(name="Releasing", value="`.release <name>` - Releases the Unamon with the given name.", inline=False)
+    await ctx.send(embed=embed)
+
+
+# If user tries to use an invalid command that is not a missing parameter error
+@client.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        embed = discord.Embed(description=f"Invalid command. Type `.help` for a list of commands.", color=discord.Color.red())
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=embed)
+        return
+    raise error
+
+
+# DEV COMMANDS ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# A command that allows devs adds custom Unamon with name, description, stats and picture
+@client.command()
+async def addunamon(ctx):
+    # Load the caught Unamon file
+    caught_file = os.path.join(os.path.dirname(__file__), "caught_unamon.txt")
+    if not os.path.exists(caught_file):
+        with open(caught_file, "w") as f:
+            f.write(json.dumps({}))
+    with open(caught_file, "r") as f:
+        caught_data = json.loads(f.read())
+
+    # First ask which user to add the Unamon to
+    embed = discord.Embed(description=f"Please mention the user you want to add the Unamon to.", color=discord.Color.blue())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
+
+    def check(message):
+        return message.author == ctx.author and message.channel == ctx.channel
+
+    try:
+        message = await client.wait_for("message", timeout=60, check=check)
+    except asyncio.TimeoutError:
+        embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
+        await ctx.send(embed=embed)
+        return
+    user = message.mentions[0]
+
+    # Ask for name, description, stats and picture
+    embed = discord.Embed(description=f"Please provide a name for the Unamon.", color=discord.Color.blue())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
+
+
+    def check(message):
+        return message.author == ctx.author and message.channel == ctx.channel
+
+    try:
+        message = await client.wait_for("message", timeout=6000, check=check)
+    except asyncio.TimeoutError:
+        embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
+        await ctx.send(embed=embed)
+        return
+    name = message.content
+
+    embed = discord.Embed(description=f"Please provide a description for the Unamon.", color=discord.Color.blue())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
+
+    try:
+        message = await client.wait_for("message", timeout=6000, check=check)
+    except asyncio.TimeoutError:
+        embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
+        await ctx.send(embed=embed)
+        return
+    description = message.content
+    
+    embed = discord.Embed(description=f"Please provide stats for the Unamon.", color=discord.Color.blue())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
+
+    try:
+        message = await client.wait_for("message", timeout=6000, check=check)
+    except asyncio.TimeoutError:
+        embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
+        await ctx.send(embed=embed)
+        return
+    stats = message.content
+
+    embed = discord.Embed(description=f"Please provide a picture for the Unamon.", color=discord.Color.blue())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
+
+    try:
+        message = await client.wait_for("message", timeout=6000, check=check)
+    except asyncio.TimeoutError:
+        embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
+        await ctx.send(embed=embed)
+        return
+    picture = message.content
+
+    # Add the Unamon to the file assigning it to the user
+    caught_data.setdefault(str(user.id), [])
+    caught_data[str(user.id)].append({
+        "name": name.title(),
+        "description": description,
+        "stats": stats,
+        "picture": picture
+    })
+    with open(caught_file, "w") as f:
+        f.write(json.dumps(caught_data))
+
+    # Send a congratulatory message
+    embed = discord.Embed(title=f"Congratulations, {ctx.author.name}!", description=f"You added **{name.title()}**!", color=discord.Color.green())
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
     await ctx.send(embed=embed)
 
 client.run(TOKEN)
