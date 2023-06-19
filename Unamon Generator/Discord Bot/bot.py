@@ -110,7 +110,7 @@ async def gen(ctx, *words):
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
         return
-
+    
     # Submit token and clear context
     pClient = poe.Client(pToken)
 
