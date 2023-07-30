@@ -2,6 +2,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import discord, random, poe, requests, re, time, asyncio, os, json
 
+
 load_dotenv()  # load environment variables from .env file
 
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -375,10 +376,11 @@ async def xp(ctx):
         await ctx.send(embed=embed)
         return
 
-    # Display the progress of the Unamon in an organised embed
+    # Display the progress of the Unamon in an organised embed, with a progress bar of the XP
     user_id, unamon_name, level, current_xp = training_unamon
-    required_xp = 10 * level ** 2
+    required_xp = int(5 * level ** 3 / 4)
     embed = discord.Embed(title=f"{unamon_name.upper()}", description=f"Level: {level}\nXP: {current_xp}/{required_xp}", color=discord.Color.blue())
+    embed.add_field(name="Progress", value=f"{'█' * int(current_xp / required_xp * 10)}{'░' * (10 - int(current_xp / required_xp * 10))}")
     embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
     await ctx.send(embed=embed)
 
@@ -493,13 +495,16 @@ async def on_message(message):
     if training_unamon is None:
         return
 
-    # Calculate the XP gained from the message
-    xp = random.randint(1, 3)
-
     # Update the Unamon's XP and level
     user_id, unamon_name, level, current_xp = training_unamon
-    required_xp = 10 * level ** 2
+
+    # Calculate the XP gained from the message
+    xp = int(level ** 1.5 + random.randint(1, 5))
+
+    # Calculate the required XP for the next level and update the Unamon's level and XP
+    required_xp = int(5 * level ** 3 / 4)
     current_xp += xp
+
     if current_xp >= required_xp:
         level += 1
         current_xp = 0
@@ -514,9 +519,7 @@ async def on_message(message):
         with open("unamon_training.txt", "r") as f:
             lines = f.readlines()
         with open("unamon_training.txt", "w") as f:
-            for line in lines:
-                if line.strip() != f"{user_id},{unamon_name},100,0":
-                    f.write(line)
+            f.writelines(line for line in lines if line.strip() != f"{user_id},{unamon_name},100,0")
 
 # Allows user to add a picture for their Unamon and will show as a thumbnail in the embed
 @client.command()
