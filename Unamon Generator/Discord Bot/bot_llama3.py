@@ -25,9 +25,10 @@ def generate_words():
 def get_unamon_info(client, words):
     # Construct message for Groq API
     prompt = (
-        f"Come up with a unique Unamon (a Fakemon of my universe), along with its typing(s) and a detailed design, "
+        f"Come up with a unique Unamon (a Fakemon of my universe), along with a creative name for it, it's typing(s) and a detailed design, "
         f"that combines the concepts of '{words[0]}' and '{words[1]}'. Please make sure that the name of the Unamon "
         f"MUST be the very first word of the text."
+        f"Do not generate any stats yet, only the name, type(s) and design (Biology including physical description, Behaviour)"
     )
 
     # Send message to Groq API and get response
@@ -215,7 +216,7 @@ async def gen(ctx, *words):
 
         # Wait for the user to react with 🎣
         try:
-            reaction, user = await client.wait_for('reaction_add', timeout=600.0, check=check)
+            reaction, user = await discord_bot.wait_for('reaction_add', timeout=600.0, check=check)
         except asyncio.TimeoutError:
             embed = discord.Embed(description=f"You didn't catch the {unamon_name} in time, {ctx.author.mention}!", color=discord.Color.red())
             await ctx.send(embed=embed)
@@ -302,7 +303,7 @@ async def u(ctx, *, arg=None):
         
         while True:
             try:
-                reaction, user = await client.wait_for("reaction_add", timeout=300, check=check)
+                reaction, user = await discord_bot.wait_for("reaction_add", timeout=300, check=check)
                 
                 if str(reaction.emoji) == "⬅️" and current_embed == 2:
                     current_embed = 1
@@ -448,7 +449,7 @@ async def rename(ctx, *, name: str):
         return message.author == ctx.author and message.channel == ctx.channel
 
     try:
-        message = await client.wait_for("message", timeout=60, check=check)
+        message = await discord_bot.wait_for("message", timeout=60, check=check)
     except asyncio.TimeoutError:
         embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
         await ctx.send(embed=embed)
@@ -535,7 +536,7 @@ async def addpic(ctx, *, name: str):
         return message.author == ctx.author and message.channel == ctx.channel
 
     try:
-        message = await client.wait_for("message", timeout=60, check=check)
+        message = await discord_bot.wait_for("message", timeout=60, check=check)
     except asyncio.TimeoutError:
         embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
         await ctx.send(embed=embed)
@@ -568,7 +569,7 @@ async def addpic_error(ctx, error):
 
 
 # Help command that displays all commands
-client.remove_command("help")
+discord_bot.remove_command("help")
 @discord_bot.command()
 async def help(ctx):
     embed = discord.Embed(title="Help", description="Here are all the commands you can use:", color=discord.Color.blue())
@@ -614,7 +615,7 @@ async def addunamon(ctx):
         return message.author == ctx.author and message.channel == ctx.channel
 
     try:
-        message = await client.wait_for("message", timeout=60, check=check)
+        message = await discord_bot.wait_for("message", timeout=60, check=check)
     except asyncio.TimeoutError:
         embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
         await ctx.send(embed=embed)
@@ -631,7 +632,7 @@ async def addunamon(ctx):
         return message.author == ctx.author and message.channel == ctx.channel
 
     try:
-        message = await client.wait_for("message", timeout=6000, check=check)
+        message = await discord_bot.wait_for("message", timeout=6000, check=check)
     except asyncio.TimeoutError:
         embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
         await ctx.send(embed=embed)
@@ -643,7 +644,7 @@ async def addunamon(ctx):
     await ctx.send(embed=embed)
 
     try:
-        message = await client.wait_for("message", timeout=6000, check=check)
+        message = await discord_bot.wait_for("message", timeout=6000, check=check)
     except asyncio.TimeoutError:
         embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
         await ctx.send(embed=embed)
@@ -655,7 +656,7 @@ async def addunamon(ctx):
     await ctx.send(embed=embed)
 
     try:
-        message = await client.wait_for("message", timeout=6000, check=check)
+        message = await discord_bot.wait_for("message", timeout=6000, check=check)
     except asyncio.TimeoutError:
         embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
         await ctx.send(embed=embed)
@@ -667,7 +668,7 @@ async def addunamon(ctx):
     await ctx.send(embed=embed)
 
     try:
-        message = await client.wait_for("message", timeout=6000, check=check)
+        message = await discord_bot.wait_for("message", timeout=6000, check=check)
     except asyncio.TimeoutError:
         embed = discord.Embed(description=f"You didn't respond in time, {ctx.author.mention}!", color=discord.Color.red())
         await ctx.send(embed=embed)
