@@ -9,7 +9,9 @@ if not API_KEY:
 client = Groq(api_key=API_KEY)
 
 # Initialize the Discord bot
-DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('DISCORD_TOKEN')
+if not TOKEN:
+    raise ValueError("Discord token is not set in environment variables.")
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='.', intents=intents)
