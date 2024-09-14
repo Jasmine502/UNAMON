@@ -3,3 +3,4 @@ discord.py
 python-dotenv
 poe-api
 requests
+groq

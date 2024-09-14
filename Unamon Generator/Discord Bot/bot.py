@@ -1,56 +1,77 @@
 from discord.ext import commands
-from dotenv import load_dotenv
-import discord, random, poe, requests, re, time, asyncio, os, json
+import discord, random, re, time, asyncio, os, json, requests
+from groq import Groq
 
+# Fetch API key from environment variables
+API_KEY = os.getenv("GROQ_API_KEY")
+if not API_KEY:
+    raise ValueError("API key for Groq is not set in environment variables.")
+client = Groq(api_key=API_KEY)
 
-load_dotenv()  # load environment variables from .env file
-
-TOKEN = os.getenv('DISCORD_TOKEN')
+# Initialize the Discord bot
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 intents = discord.Intents.default()
 intents.message_content = True
+bot = commands.Bot(command_prefix='.', intents=intents)
 
-client = commands.Bot(command_prefix='.', intents=intents)
-
+# Function to generate random words
 def generate_words():
     response = requests.get("https://random-word-api.herokuapp.com/word?number=2")
     return response.json()
 
-# Function to get Unamon name and description from Poe API
+# Function to get Unamon name and description from Groq API
 def get_unamon_info(client, words):
-    # Construct message for Poe API
-    message = f"Come up with a unique Unamon (a Fakemon of my universe), along with its typing(s) and a detailed design, that combines the concepts of '{words[0]}' and '{words[1]}'. Please make sure that the name of the Unamon MUST be the very first word of the text"
+    # Construct message for Groq API
+    prompt = (
+        f"Come up with a unique Unamon (a Fakemon of my universe), along with its typing(s) and a detailed design, "
+        f"that combines the concepts of '{words[0]}' and '{words[1]}'. Please make sure that the name of the Unamon "
+        f"MUST be the very first word of the text."
+    )
+
+    # Send message to Groq API and get response
+    response = client.chat.completions.create(
+        model="llama3-8b-8192",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=1,
+        max_tokens=800,
+        top_p=1,
+        stream=False
+    )
     
-    # Send message to Poe API
-    response = ""
-    for chunk in client.send_message("chinchilla", message):
-        response += chunk["text_new"]
-    
-    # Remove any non-alphabetic characters from Unamon name
-    unamon_name = re.sub(r"[^a-zA-Z]", "", response.split()[0])
-    unamon_desc = response.strip()
+    # Extract and process the response
+    unamon_desc = response.choices[0].message.content
+    unamon_name = re.sub(r"[^a-zA-Z]", "", unamon_desc.split()[0])
 
     return unamon_name, unamon_desc
 
+# Function to generate Unamon stats from Groq API
 def generate_stats(client, unamon_name):
     # Prompt for Unamon stats
-    prompt = f"Come up with the appropriate following stats/info for {unamon_name}:\n" \
-             "Signature Move (with a short description), it's PP, Attack DMG, Accuracy %, the move's type, the effectiveness percentage, and the level it's learned\n" \
-             "The Category of the Unamon\n" \
-             "It's height and weight in imperial units\n" \
-             "It's cry in onomatopoeia\n" \
-             "It's stats (HP, ATK, DEF, SpA, SpD and Speed).\n" \
-             "Evolves from/into (if any)\n" \
-             "An interesting, unique and creative PokéDex entry.\n" \
-             "3 existing abilities that it can learn (with a short description of what it does), last of them being a Hidden Ability"
-    
-    # Send prompt to Poe API and get response
-    response = ""
-    for chunk in client.send_message("chinchilla", prompt):
-        response += chunk["text_new"]
-    
-    return response
+    prompt = (
+        f"Come up with the appropriate following stats/info for {unamon_name}:\n"
+        "Signature Move (with a short description), its PP, Attack DMG, Accuracy %, the move's type, the effectiveness percentage, and the level it's learned\n"
+        "The Category of the Unamon\n"
+        "Its height and weight in imperial units\n"
+        "Its cry in onomatopoeia\n"
+        "Its stats (HP, ATK, DEF, SpA, SpD, and Speed).\n"
+        "Evolves from/into (if any)\n"
+        "An interesting, unique, and creative PokéDex entry.\n"
+        "3 existing abilities that it can learn (with a short description of what it does), last of them being a Hidden Ability"
+    )
 
+    # Send prompt to Groq API and get response
+    response = client.chat.completions.create(
+        model="llama3-8b-8192",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=1,
+        max_tokens=800,
+        top_p=1,
+        stream=False
+    )
 
+    return response.choices[0].message.content
+
+# Function to get Unamon by name for a specific user
 def get_unamon_by_name(user_id, name):
     with open("caught_unamon.txt", "r") as f:
         caught_unamon = json.load(f)
@@ -61,68 +82,52 @@ def get_unamon_by_name(user_id, name):
             return unamon
     return None
 
-
+# Function to get training Unamon by user
 def get_training_unamon_by_user(user_id):
-    with open("unamon_training.txt", "r") as f:
-        lines = f.readlines()
-        for line in lines:
-            parts = line.strip().split(",")
-            if parts[0] == str(user_id):
-                return (int(parts[0]), parts[1], int(parts[2]), int(parts[3]))
+    try:  # Added error handling for file operations
+        with open("unamon_training.txt", "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                parts = line.strip().split(",")
+                if parts[0] == str(user_id):
+                    return int(parts[0]), parts[1], int(parts[2]), int(parts[3])
+    except FileNotFoundError:
+        return None  # Return None if file not found
     return None
 
-
+# Function to update training Unamon
 def update_training_unamon(user_id, unamon_name, level, current_xp):
     new_lines = []
-    with open("unamon_training.txt", "r") as f:
-        for line in f:
-            line_parts = line.strip().split(",")
-            if line_parts[0] == str(user_id) and line_parts[1] == unamon_name:
-                new_lines.append(f"{user_id},{unamon_name},{level},{current_xp}")
-            else:
-                new_lines.append(line.strip())
+    try:  # Added error handling for file operations
+        with open("unamon_training.txt", "r") as f:
+            for line in f:
+                line_parts = line.strip().split(",")
+                if line_parts[0] == str(user_id) and line_parts[1] == unamon_name:
+                    new_lines.append(f"{user_id},{unamon_name},{level},{current_xp}")
+                else:
+                    new_lines.append(line.strip())
+    except FileNotFoundError:
+        return  # Exit if file not found
 
     with open("unamon_training.txt", "w") as f:
         f.write("\n".join(new_lines))
 
-
-@client.event
+@bot.event
 async def on_ready():
     print('Bot is readyyyyyy')
 
     # Display with an embed a greeting from the bot
     embed = discord.Embed(title="Hello!", description="I'm ready to discover some new Unamon!", color=discord.Color.blue())
     embed.set_author(name="Unamon Generator", icon_url="https://i.imgur.com/6EkzZWy.png")
-    await client.get_channel(1095804559198273648).send(embed=embed)
+    await bot.get_channel(1095804559198273648).send(embed=embed)
 
-
-@client.command()
+@bot.command()
 async def gen(ctx, *words):
-    # Map user IDs to Poe API tokens
-    users = {}
-    for user_id in os.environ:
-        user_id = str(ctx.author.id)
-        users[user_id] = os.getenv(user_id)
-    pToken = users.get(user_id)
-
-    # If user or token not found, return
-    if not pToken:
-        embed = discord.Embed(description=f"Sorry, you are not recognised as a user, or your token is invalid.", color=discord.Color.red())
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
-        await ctx.send(embed=embed)
-        return
-    
-    # Submit token and clear context
-    pClient = poe.Client(pToken)
-
-    # Clear context to Poe API
-    pClient.send_chat_break("chinchilla")
-
     # If no words provided, generate random words
     if not words:
         while True:
             words = generate_words()
-            embed = discord.Embed(title=f"Random words:", description=f"**{words[0]}**\n**{words[1]}**\n\nProceed?", color=discord.Color.blue())
+            embed = discord.Embed(title="Random words:", description=f"**{words[0]}**\n**{words[1]}**\n\nProceed?", color=discord.Color.blue())
             embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
             message = await ctx.send(embed=embed)
             await message.add_reaction('👍')
@@ -133,7 +138,7 @@ async def gen(ctx, *words):
                 return user == ctx.author and str(reaction.emoji) in ['👍', '👎', '❌'] and reaction.message == message
             
             try:
-                reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+                reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
             except asyncio.TimeoutError:
                 embed = discord.Embed(description=f"Messaged timed out for {ctx.author.mention}. Try again later.", color=discord.Color.red())
                 await ctx.send(embed=embed)
@@ -141,7 +146,7 @@ async def gen(ctx, *words):
             if str(reaction.emoji) == '👍':
                 break
             elif str(reaction.emoji) == '❌':
-                embed = discord.Embed(description=f"Cancelled Unamon generation.", color=discord.Color.red())
+                embed = discord.Embed(description="Cancelled Unamon generation.", color=discord.Color.red())
                 embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
                 await ctx.send(embed=embed)
                 return
@@ -152,20 +157,19 @@ async def gen(ctx, *words):
             embed.description = f"**{words[0]}**\n**{words[1]}**"
             await message.edit(embed=embed)
 
-
     # If custom words provided, validate the input
     elif len(words) != 2:
-        embed = discord.Embed(description=f"Please provide either 2 words, or no words to generate an Unamon.", color=discord.Color.red())
+        embed = discord.Embed(description="Please provide either 2 words, or no words to generate an Unamon.", color=discord.Color.red())
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
         return
 
- # Generate Unamon description with Poe
-    embed = discord.Embed(description=f"Generating Unamon...", color=discord.Color.blue())
+    # Generate Unamon description with Groq
+    embed = discord.Embed(description="Generating Unamon...", color=discord.Color.blue())
     embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
     msg = await ctx.send(embed=embed)
     try:
-        unamon_name, unamon_desc = get_unamon_info(pClient, words)
+        unamon_name, unamon_desc = get_unamon_info(client, words)
     except Exception as e:
         embed = discord.Embed(description=f"Error: {str(e)}", color=discord.Color.red())
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
@@ -184,18 +188,18 @@ async def gen(ctx, *words):
     await message.add_reaction("👎")
     
     try:
-        reaction, user = await client.wait_for('reaction_add', check=lambda reaction, user: user == ctx.author and reaction.emoji in ['👍', '👎'], timeout=600.0)
+        reaction, user = await bot.wait_for('reaction_add', check=lambda reaction, user: user == ctx.author and reaction.emoji in ['👍', '👎'], timeout=600.0)
     except asyncio.TimeoutError:
         embed = discord.Embed(description=f"Messaged timed out for {ctx.author.mention}. Try again later.", color=discord.Color.red())
         await ctx.send(embed=embed)
         return
         
-    # If user wants to generate stats, generate them with Poe
+    # If user wants to generate stats, generate them with Groq
     if reaction.emoji == "👍":
         embed = discord.Embed(description=f"Generating stats for **{unamon_name}**...", color=discord.Color.blue())
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
         msg = await ctx.send(embed=embed)
-        unamon_stats = generate_stats(pClient, unamon_name)
+        unamon_stats = generate_stats(client, unamon_name)
         embed = discord.Embed(title=f"{unamon_name.upper()} STATS", description=unamon_stats, color=color)
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
         await msg.edit(embed=embed)
@@ -347,18 +351,6 @@ async def train(ctx, *, name: str):
 # Handle invalid train parameters
 @train.error
 async def train_error(ctx, error):
-    # Check if the error is a missing parameter error
-    if isinstance(error, commands.MissingRequiredArgument):
-        embed = discord.Embed(description="Please provide a name for the Unamon you want to train.", color=discord.Color.red())
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
-        await ctx.send(embed=embed)
-        return
-    
-
-# Handle the case where paramaters are not provided
-@train.error
-async def train_error(ctx, error):
-    # Check if the error is a missing parameter error
     if isinstance(error, commands.MissingRequiredArgument):
         embed = discord.Embed(description="Please provide a name for the Unamon you want to train.", color=discord.Color.red())
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
