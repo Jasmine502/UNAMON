@@ -72,9 +72,9 @@ def generate_stats(client, unamon_name):
 def safe_file_read(file_path):
     try:
         with open(file_path, "r") as f:
-            return json.load(f)
+            return [line.strip() for line in f.readlines()]  # Return a list of strings
     except FileNotFoundError:
-        return {}
+        return []
 
 def safe_file_write(file_path, data):
     with open(file_path, "w") as f:
